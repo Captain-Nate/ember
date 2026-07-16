@@ -1,16 +1,20 @@
 {
   "expo": {
-    "name": "ember",
+    "name": "Ember",
     "slug": "ember",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "ember",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0B0D14",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.captainnate.ember",
+      "appleTeamId": "7Y5KKUDQ6F"
     },
     "android": {
+      "package": "com.captainnate.ember",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -28,7 +32,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#0B0D14",
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
