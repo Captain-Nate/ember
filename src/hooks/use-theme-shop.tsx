@@ -81,6 +81,13 @@ export function IAPShopProvider({ children }: { children: ReactNode }) {
       const anyPurchase = purchase as AnyPurchase;
       const productId = anyPurchase.productId ?? anyPurchase.id ?? '';
       console.log('[shop] purchase delivered:', productId);
+      if (__DEV__) {
+        // environmentIOS + transaction dates distinguish stale re-grants
+        // (Xcode test store vs Sandbox) from fresh purchases.
+        try {
+          console.log('[shop] purchase payload:', JSON.stringify(purchase));
+        } catch {}
+      }
       const target = themeIdForProduct(productId);
       if (target) {
         const owned = target === 'bundle' ? await unlockAllThemes() : await unlockTheme(target);
