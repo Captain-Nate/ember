@@ -79,14 +79,19 @@ export function IAPShopProvider({ children }: { children: ReactNode }) {
   const iap = (useIAPImpl ?? useIAPStub)({
     onPurchaseSuccess: async (purchase) => {
       const anyPurchase = purchase as AnyPurchase;
-      const target = themeIdForProduct(anyPurchase.productId ?? anyPurchase.id ?? '');
+      const productId = anyPurchase.productId ?? anyPurchase.id ?? '';
+      console.log('[shop] purchase delivered:', productId);
+      const target = themeIdForProduct(productId);
       if (target) {
         const owned = target === 'bundle' ? await unlockAllThemes() : await unlockTheme(target);
         announceOwned(owned);
       }
       try {
         await iapRef.current?.finishTransaction({ purchase, isConsumable: false });
-      } catch {}
+        console.log('[shop] finishTransaction ok:', productId);
+      } catch (e) {
+        console.log('[shop] finishTransaction FAILED:', productId, String(e));
+      }
     },
     onPurchaseError: (error) => {
       const anyError = error as { code?: string; message?: string };
@@ -197,6 +202,12 @@ export function useThemeShop(onOwnedChanged: (owned: ThemeId[]) => void) {
   const buyTheme = useCallback(
     async (id: ThemeId) => {
       if (!(await ensureReady())) {
+        // Real devices must never silently unlock: the stub is only for
+        // environments without the native IAP module (web, Expo Go).
+        if (useIAPImpl) {
+          infoDialog('The store is not responding right now — try again in a moment.');
+          return;
+        }
         const ok = await confirmDialog(
           `Unlock ${THEMES[id].name}?`,
           `${THEME_PRICE_LABEL} — adds a new flame and candle color.`,
@@ -214,6 +225,10 @@ export function useThemeShop(onOwnedChanged: (owned: ThemeId[]) => void) {
 
   const buyBundle = useCallback(async () => {
     if (!(await ensureReady())) {
+      if (useIAPImpl) {
+        infoDialog('The store is not responding right now — try again in a moment.');
+        return;
+      }
       const ok = await confirmDialog(
         'Unlock all themes?',
         `${BUNDLE_PRICE_LABEL} — every theme, including all future ones.`,
@@ -229,7 +244,11 @@ export function useThemeShop(onOwnedChanged: (owned: ThemeId[]) => void) {
 
   const restore = useCallback(async () => {
     if (!(await ensureReady())) {
-      infoDialog('Purchase restoring arrives with the App Store version of Ember.');
+      infoDialog(
+        useIAPImpl
+          ? 'The store is not responding right now — try again in a moment.'
+          : 'Purchase restoring arrives with the App Store version of Ember.',
+      );
       return;
     }
     try {
