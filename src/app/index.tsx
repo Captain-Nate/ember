@@ -135,9 +135,14 @@ export default function FocusScreen() {
         ? '+1 session — the flame grows brighter'
         : status === 'doused'
           ? 'The flame went out…'
-          : timer.todayCount > 0
-            ? `${timer.todayCount} session${timer.todayCount === 1 ? '' : 's'} today`
-            : 'Ready to focus?';
+          : [
+              timer.streak > 0 ? `${timer.streak} day streak` : null,
+              timer.todayCount > 0
+                ? `${timer.todayCount} session${timer.todayCount === 1 ? '' : 's'} today`
+                : null,
+            ]
+              .filter(Boolean)
+              .join(' · ') || 'Ready to focus?';
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'bottom']}>
@@ -147,11 +152,9 @@ export default function FocusScreen() {
           <Pressable style={styles.streakChip} onPress={() => router.push('/collection')}>
             <Text style={styles.streakText}>Candles</Text>
           </Pressable>
-          <View style={styles.streakChip}>
-            <Text style={styles.streakText}>
-              {timer.streak > 0 ? `${timer.streak} day streak` : 'no streak yet'}
-            </Text>
-          </View>
+          <Pressable style={styles.streakChip} onPress={() => router.push('/shop')}>
+            <Text style={styles.streakText}>Shop</Text>
+          </Pressable>
         </View>
       </View>
 
@@ -304,9 +307,6 @@ export default function FocusScreen() {
                   </Pressable>
                 );
               })}
-              <Pressable style={styles.shopDot} onPress={() => router.push('/shop')}>
-                <Text style={styles.shopDotText}>+</Text>
-              </Pressable>
             </>
           )}
         </View>
@@ -556,22 +556,6 @@ const styles = StyleSheet.create({
     borderColor: palette.cardBorder,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  shopDot: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    backgroundColor: palette.card,
-    borderWidth: 1,
-    borderColor: palette.cardBorder,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  shopDotText: {
-    color: palette.inkDim,
-    fontSize: 16,
-    fontWeight: '700',
-    lineHeight: 18,
   },
   bundleLink: {
     textDecorationLine: 'underline',

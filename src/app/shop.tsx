@@ -58,22 +58,7 @@ export default function ShopScreen() {
         <Pressable style={styles.backBtn} onPress={() => router.back()}>
           <Text style={styles.backText}>‹ Back</Text>
         </Pressable>
-        <Text
-          style={styles.title}
-          onLongPress={
-            __DEV__
-              ? async () => {
-                  // dev-only escape hatch for purchase testing
-                  const ok = await confirmDialog('Reset entitlements?', 'Dev only.', 'Reset');
-                  if (!ok) return;
-                  await AsyncStorage.removeItem('ember.entitlements.v1');
-                  setOwned([FREE_THEME]);
-                }
-              : undefined
-          }
-        >
-          Theme shop
-        </Text>
+        <Text style={styles.title}>Theme shop</Text>
         <View style={styles.headerSpacer} />
       </View>
 
@@ -146,6 +131,25 @@ export default function ShopScreen() {
         <Pressable onPress={shop.restore}>
           <Text style={styles.restore}>Restore purchases</Text>
         </Pressable>
+
+        {__DEV__ && (
+          <Pressable
+            onPress={async () => {
+              const ok = await confirmDialog(
+                'Reset purchases?',
+                'Dev only — clears local unlocks and reselects Ember.',
+                'Reset',
+              );
+              if (!ok) return;
+              await AsyncStorage.removeItem('ember.entitlements.v1');
+              await AsyncStorage.setItem(THEME_STORAGE_KEY, FREE_THEME).catch(() => {});
+              setSelectedId(FREE_THEME);
+              setOwned([FREE_THEME]);
+            }}
+          >
+            <Text style={styles.devReset}>Reset purchases (dev)</Text>
+          </Pressable>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -267,5 +271,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     textDecorationLine: 'underline',
     marginTop: 14,
+  },
+  devReset: {
+    color: palette.danger,
+    fontSize: 12,
+    textAlign: 'center',
+    textDecorationLine: 'underline',
+    marginTop: 12,
   },
 });
