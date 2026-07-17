@@ -346,7 +346,7 @@ export default function FocusScreen() {
             style={[styles.primaryBtn, { backgroundColor: theme.accent }]}
             onPress={timer.dismissDone}
           >
-            <Text style={[styles.primaryBtnText, { color: theme.buttonInk }]}>Keep it going</Text>
+            <Text style={[styles.primaryBtnText, { color: theme.buttonInk }]}>Continue</Text>
           </Pressable>
         )}
         {status === 'doused' && (
