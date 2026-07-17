@@ -28,13 +28,22 @@ import {
 type IAPHook = typeof import('expo-iap').useIAP;
 
 let useIAPImpl: IAPHook | null = null;
+let restorePurchasesImpl: (() => Promise<void>) | null = null;
+let getAvailablePurchasesImpl:
+  | ((options?: { onlyIncludeActiveItemsIOS?: boolean }) => Promise<unknown[]>)
+  | null = null;
 try {
   if (Platform.OS === 'ios' || Platform.OS === 'android') {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    useIAPImpl = require('expo-iap').useIAP;
+    const iap = require('expo-iap');
+    useIAPImpl = iap.useIAP;
+    restorePurchasesImpl = iap.restorePurchases ?? null;
+    getAvailablePurchasesImpl = iap.getAvailablePurchases ?? null;
   }
 } catch {
   useIAPImpl = null;
+  restorePurchasesImpl = null;
+  getAvailablePurchasesImpl = null;
 }
 
 const useIAPStub = (() => ({
@@ -150,8 +159,43 @@ export function IAPShopProvider({ children }: { children: ReactNode }) {
         });
       },
       availablePurchases: async () => {
-        const result = await iapRef.current?.getAvailablePurchases();
-        if (Array.isArray(result)) return result as AnyPurchase[];
+        // NOTE: must be the module-level getAvailablePurchases — the hook's
+        // version returns undefined and only fills React state, and reading
+        // that state in the same tick is a race that comes back empty.
+        const query = async (): Promise<AnyPurchase[] | null> => {
+          if (!getAvailablePurchasesImpl) return null;
+          try {
+            const direct = (await getAvailablePurchasesImpl({
+              onlyIncludeActiveItemsIOS: true,
+            })) as AnyPurchase[];
+            console.log(
+              '[shop] restore: query returned',
+              direct.length,
+              JSON.stringify(direct.map((p) => p.productId ?? p.id)),
+            );
+            return direct;
+          } catch (e) {
+            console.log('[shop] restore: query FAILED', String(e));
+            return null;
+          }
+        };
+        // iOS keeps the signed-in account's transaction store warm, so most
+        // restores need no sync and no auth prompt — query first.
+        const first = await query();
+        if (first && first.length > 0) return first;
+        // Nothing found: sync with the App Store (may show an auth prompt —
+        // fine on the explicit Restore tap) and query once more. Covers a
+        // just-signed-in device whose automatic sync hasn't landed yet.
+        if (restorePurchasesImpl) {
+          try {
+            await restorePurchasesImpl();
+            console.log('[shop] restore: sync ok');
+          } catch (e) {
+            console.log('[shop] restore: sync FAILED', String(e));
+          }
+        }
+        const second = await query();
+        if (second) return second;
         return (iapRef.current?.availablePurchases ?? []) as AnyPurchase[];
       },
       announceOwned,
