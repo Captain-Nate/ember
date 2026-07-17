@@ -42,7 +42,7 @@ export async function scheduleSessionComplete(endAtMs: number): Promise<string |
       content: {
         title: 'Session complete',
         body: 'Ember has lit a new candle for your collection.',
-        sound: 'default',
+        sound: 'ember-complete.wav',
       },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.DATE,

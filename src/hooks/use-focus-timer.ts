@@ -5,6 +5,7 @@ import { AppState, Platform } from 'react-native';
 import { endLiveActivity, startLiveActivity } from '../../modules/live-activity';
 import { getLastLockAt } from '../../modules/lock-state';
 import { ThemeId } from '@/constants/themes';
+import { initCompletionChime, playCompletionChime } from '@/lib/completion-chime';
 import {
   cancelSessionAlert,
   initSessionAlerts,
@@ -90,6 +91,7 @@ export function useFocusTimer(themeId: ThemeId) {
 
   useEffect(() => {
     initSessionAlerts();
+    initCompletionChime();
     endLiveActivity(); // clear any activity left over from a previous app run
     AsyncStorage.getItem(STORAGE_KEY)
       .then((raw) => {
@@ -158,6 +160,9 @@ export function useFocusTimer(themeId: ThemeId) {
           setStatus('done');
           endLiveActivity();
           alertIdRef.current = null; // let the completion alert fire (suppressed in foreground)
+          // A tick this close to endAt means the user watched it finish; late
+          // ticks (resume from lock/background) already rang via the notification.
+          if (rem > -2500) playCompletionChime();
           recordCompletedSession();
         } else {
           setRemainingMs(rem);

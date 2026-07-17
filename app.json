@@ -33,7 +33,12 @@
     "plugins": [
       "expo-router",
       "@bacons/apple-targets",
-      "expo-notifications",
+      [
+        "expo-notifications",
+        {
+          "sounds": ["./assets/sounds/ember-complete.wav"]
+        }
+      ],
       [
         "expo-splash-screen",
         {
@@ -42,7 +47,8 @@
           "imageWidth": 160
         }
       ],
-      "expo-iap"
+      "expo-iap",
+      "expo-audio"
     ],
     "experiments": {
       "typedRoutes": true,
