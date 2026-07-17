@@ -1,0 +1,31 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="55%" r="50%">
+      <stop offset="0%" stop-color="#FF9C3F" stop-opacity="0.5"/>
+      <stop offset="70%" stop-color="#FF9C3F" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#FF9C3F" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFD97A"/>
+      <stop offset="0.55" stop-color="#FF9C3F"/>
+      <stop offset="1" stop-color="#F2552C"/>
+    </linearGradient>
+    <linearGradient id="inner" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFF3C2"/>
+      <stop offset="1" stop-color="#FFC95B"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1024" height="1024" fill="#0B0D14"/>
+  <circle cx="512" cy="512" r="440" fill="url(#glow)"/>
+
+  <g transform="translate(162, 85) scale(3.5)">
+    <path d="M100 18 C95.5 60 35 96 35 156 C35 202 64.2 226 100 226 C135.8 226 165 202 165 156 C165 96 104.5 60 100 18 Z" fill="url(#body)"/>
+    <path d="M100 78 C96.6 104 61.9 122 61.9 162 C61.9 192 79.8 206 100 206 C120.2 206 138.1 192 138.1 162 C138.1 122 103.4 104 100 78 Z" fill="url(#inner)" opacity="0.9"/>
+    <ellipse cx="75.4" cy="148" rx="7.5" ry="11" fill="#46220E"/>
+    <ellipse cx="124.6" cy="148" rx="7.5" ry="11" fill="#46220E"/>
+    <path d="M84.3 176 Q100 187 115.7 176" stroke="#46220E" stroke-width="5" stroke-linecap="round" fill="none"/>
+    <circle cx="59.7" cy="166" r="6" fill="#FF8A4D" opacity="0.45"/>
+    <circle cx="140.3" cy="166" r="6" fill="#FF8A4D" opacity="0.45"/>
+  </g>
+</svg>

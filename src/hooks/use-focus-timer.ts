@@ -2,8 +2,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, Platform } from 'react-native';
 
+import { endLiveActivity, startLiveActivity } from '../../modules/live-activity';
 import { getLastLockAt } from '../../modules/lock-state';
 import { ThemeId } from '@/constants/themes';
+import {
+  cancelSessionAlert,
+  initSessionAlerts,
+  scheduleSessionComplete,
+} from '@/lib/session-alerts';
 import { appendSession } from '@/lib/session-log';
 
 export type TimerStatus = 'idle' | 'running' | 'done' | 'doused';
@@ -75,6 +81,7 @@ export function useFocusTimer(themeId: ThemeId) {
   const startedDurationMinRef = useRef(25);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const backgroundedAtRef = useRef<number | null>(null);
+  const alertIdRef = useRef<string | null>(null);
   const statusRef = useRef<TimerStatus>('idle');
 
   useEffect(() => {
@@ -82,6 +89,8 @@ export function useFocusTimer(themeId: ThemeId) {
   }, [status]);
 
   useEffect(() => {
+    initSessionAlerts();
+    endLiveActivity(); // clear any activity left over from a previous app run
     AsyncStorage.getItem(STORAGE_KEY)
       .then((raw) => {
         if (raw) setStats(normalize(JSON.parse(raw) as StoredStats));
@@ -134,12 +143,21 @@ export function useFocusTimer(themeId: ThemeId) {
       setDurationMin(min);
       setRemainingMs(min * 60_000);
       setStatus('running');
+
+      startLiveActivity(endAtRef.current, Date.now(), themeIdRef.current);
+      cancelSessionAlert(alertIdRef.current);
+      scheduleSessionComplete(endAtRef.current).then((id) => {
+        alertIdRef.current = id;
+      });
+
       intervalRef.current = setInterval(() => {
         const rem = endAtRef.current - Date.now();
         if (rem <= 0) {
           clearTicker();
           setRemainingMs(0);
           setStatus('done');
+          endLiveActivity();
+          alertIdRef.current = null; // let the completion alert fire (suppressed in foreground)
           recordCompletedSession();
         } else {
           setRemainingMs(rem);
@@ -152,6 +170,9 @@ export function useFocusTimer(themeId: ThemeId) {
   // Doused is a resting state — the user taps "Go back" (dismissDone) to move on.
   const douse = useCallback((frozenRemainingMs?: number) => {
     clearTicker();
+    endLiveActivity();
+    cancelSessionAlert(alertIdRef.current);
+    alertIdRef.current = null;
     if (frozenRemainingMs != null) setRemainingMs(Math.max(0, frozenRemainingMs));
     setStatus('doused');
     appendSession({

@@ -1,19 +1,28 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { router } from 'expo-router';
-import { ReactNode, useEffect, useRef, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Svg, { Path, Rect } from 'react-native-svg';
 
 import { Candle } from '@/components/candle';
 import { Flame, FlameMood } from '@/components/flame';
 import { ProgressRing } from '@/components/progress-ring';
 import { palette } from '@/constants/palette';
-import { THEME_IDS, THEMES, ThemeId } from '@/constants/themes';
+import { THEME_IDS, THEME_STORAGE_KEY, THEMES, ThemeId } from '@/constants/themes';
 import { formatMs, useFocusTimer } from '@/hooks/use-focus-timer';
+import {
+  BUNDLE_PRICE_LABEL,
+  confirmDialog,
+  grandfatherTheme,
+  loadOwnedThemes,
+  THEME_PRICE_LABEL,
+  unlockAllThemes,
+  unlockTheme,
+} from '@/lib/entitlements';
 
 const PRESETS = [15, 25, 50];
 const CUSTOM_KEY = 'ember.customMin.v1';
-const THEME_KEY = 'ember.theme.v1';
 const CUSTOM_MIN = 1;
 const CUSTOM_MAX = 180;
 
@@ -43,6 +52,7 @@ function PopIn({ children }: { children: ReactNode }) {
 
 export default function FocusScreen() {
   const [themeId, setThemeId] = useState<ThemeId>('ember');
+  const [owned, setOwned] = useState<ThemeId[]>(['ember']);
   const theme = THEMES[themeId];
   const timer = useFocusTimer(themeId);
   const { status } = timer;
@@ -56,16 +66,61 @@ export default function FocusScreen() {
         if (n >= CUSTOM_MIN && n <= CUSTOM_MAX) setCustomMin(n);
       })
       .catch(() => {});
-    AsyncStorage.getItem(THEME_KEY)
-      .then((raw) => {
-        if (raw && raw in THEMES) setThemeId(raw as ThemeId);
-      })
-      .catch(() => {});
+    (async () => {
+      const [raw, ownedList] = await Promise.all([
+        AsyncStorage.getItem(THEME_STORAGE_KEY).catch(() => null),
+        loadOwnedThemes(),
+      ]);
+      let nextOwned = ownedList;
+      if (raw && raw in THEMES) {
+        const stored = raw as ThemeId;
+        // pre-shop installs keep whatever theme they already had selected
+        if (!nextOwned.includes(stored)) nextOwned = await grandfatherTheme(stored);
+        setThemeId(stored);
+      }
+      setOwned(nextOwned);
+    })();
   }, []);
 
+  // refresh after the shop screen unlocks or switches themes
+  useFocusEffect(
+    useCallback(() => {
+      loadOwnedThemes().then(setOwned);
+      AsyncStorage.getItem(THEME_STORAGE_KEY)
+        .then((raw) => {
+          if (raw && raw in THEMES) setThemeId(raw as ThemeId);
+        })
+        .catch(() => {});
+    }, []),
+  );
+
+  const isPreviewing = !owned.includes(themeId);
+
   const selectTheme = (id: ThemeId) => {
-    setThemeId(id);
-    AsyncStorage.setItem(THEME_KEY, id).catch(() => {});
+    setThemeId(id); // locked themes apply as a live preview; only owned picks persist
+    if (owned.includes(id)) {
+      AsyncStorage.setItem(THEME_STORAGE_KEY, id).catch(() => {});
+    }
+  };
+
+  const unlockCurrent = async () => {
+    const ok = await confirmDialog(
+      `Unlock ${theme.name}?`,
+      `${THEME_PRICE_LABEL} — adds a new flame and candle color.`,
+    );
+    if (!ok) return;
+    setOwned(await unlockTheme(themeId));
+    AsyncStorage.setItem(THEME_STORAGE_KEY, themeId).catch(() => {});
+  };
+
+  const unlockBundle = async () => {
+    const ok = await confirmDialog(
+      'Unlock all themes?',
+      `${BUNDLE_PRICE_LABEL} — every theme, including all future ones.`,
+    );
+    if (!ok) return;
+    setOwned(await unlockAllThemes());
+    AsyncStorage.setItem(THEME_STORAGE_KEY, themeId).catch(() => {});
   };
 
   const adjustCustom = (delta: number) => {
@@ -212,21 +267,42 @@ export default function FocusScreen() {
         </View>
 
         <View style={styles.swatchRow}>
-          {status === 'idle' &&
-            THEME_IDS.map((id) => {
-              const selected = id === themeId;
-              return (
-                <Pressable
-                  key={id}
-                  onPress={() => selectTheme(id)}
-                  style={[
-                    styles.swatch,
-                    { backgroundColor: THEMES[id].accent },
-                    selected && styles.swatchSelected,
-                  ]}
-                />
-              );
-            })}
+          {status === 'idle' && (
+            <>
+              {THEME_IDS.map((id) => {
+                const selected = id === themeId;
+                const locked = !owned.includes(id);
+                return (
+                  <Pressable key={id} onPress={() => selectTheme(id)} style={styles.swatchWrap}>
+                    <View
+                      style={[
+                        styles.swatch,
+                        { backgroundColor: THEMES[id].accent },
+                        selected && styles.swatchSelected,
+                      ]}
+                    />
+                    {locked && (
+                      <View style={styles.lockBadge}>
+                        <Svg width={8} height={8} viewBox="0 0 12 12">
+                          <Path
+                            d="M3.5 5 V3.5 a2.5 2.5 0 0 1 5 0 V5"
+                            stroke={palette.ink}
+                            strokeWidth={1.6}
+                            fill="none"
+                            strokeLinecap="round"
+                          />
+                          <Rect x={2.4} y={5} width={7.2} height={5.2} rx={1.6} fill={palette.ink} />
+                        </Svg>
+                      </View>
+                    )}
+                  </Pressable>
+                );
+              })}
+              <Pressable style={styles.shopDot} onPress={() => router.push('/shop')}>
+                <Text style={styles.shopDotText}>+</Text>
+              </Pressable>
+            </>
+          )}
         </View>
             </>
           )}
@@ -234,14 +310,26 @@ export default function FocusScreen() {
       </View>
 
       <View style={styles.footer}>
-        {status === 'idle' && (
-          <Pressable
-            style={[styles.primaryBtn, { backgroundColor: theme.accent }]}
-            onPress={() => timer.start()}
-          >
-            <Text style={[styles.primaryBtnText, { color: theme.buttonInk }]}>Light the flame</Text>
-          </Pressable>
-        )}
+        {status === 'idle' &&
+          (isPreviewing ? (
+            <Pressable
+              style={[styles.primaryBtn, { backgroundColor: theme.accent }]}
+              onPress={unlockCurrent}
+            >
+              <Text style={[styles.primaryBtnText, { color: theme.buttonInk }]}>
+                Unlock {theme.name} · {THEME_PRICE_LABEL}
+              </Text>
+            </Pressable>
+          ) : (
+            <Pressable
+              style={[styles.primaryBtn, { backgroundColor: theme.accent }]}
+              onPress={() => timer.start()}
+            >
+              <Text style={[styles.primaryBtnText, { color: theme.buttonInk }]}>
+                Light the flame
+              </Text>
+            </Pressable>
+          ))}
         {status === 'running' && (
           <Pressable style={styles.giveUpBtn} onPress={timer.giveUp}>
             <Text style={styles.giveUpBtnText}>Give up</Text>
@@ -268,6 +356,13 @@ export default function FocusScreen() {
             <Text style={styles.footerHint}>
               Leaving the app puts the flame out — locking your phone is safe
             </Text>
+          )}
+          {status === 'idle' && isPreviewing && (
+            <Pressable onPress={unlockBundle}>
+              <Text style={[styles.footerHint, styles.bundleLink]}>
+                or get all themes · {BUNDLE_PRICE_LABEL}
+              </Text>
+            </Pressable>
           )}
         </View>
       </View>
@@ -430,6 +525,10 @@ const styles = StyleSheet.create({
     gap: 14,
     height: 30,
   },
+  swatchWrap: {
+    width: 26,
+    height: 26,
+  },
   swatch: {
     width: 26,
     height: 26,
@@ -438,6 +537,38 @@ const styles = StyleSheet.create({
   swatchSelected: {
     borderWidth: 3,
     borderColor: palette.ink,
+  },
+  lockBadge: {
+    position: 'absolute',
+    right: -4,
+    bottom: -4,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: palette.bg,
+    borderWidth: 1,
+    borderColor: palette.cardBorder,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  shopDot: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: palette.card,
+    borderWidth: 1,
+    borderColor: palette.cardBorder,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  shopDotText: {
+    color: palette.inkDim,
+    fontSize: 16,
+    fontWeight: '700',
+    lineHeight: 18,
+  },
+  bundleLink: {
+    textDecorationLine: 'underline',
   },
   hintSlot: {
     height: 40,

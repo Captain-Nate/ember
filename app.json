@@ -4,14 +4,17 @@
     "slug": "ember",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/icon-ember.png",
     "scheme": "ember",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#0B0D14",
     "ios": {
-      "icon": "./assets/expo.icon",
+      "icon": "./assets/images/icon-ember.png",
       "bundleIdentifier": "com.captainnate.ember",
-      "appleTeamId": "7Y5KKUDQ6F"
+      "appleTeamId": "7Y5KKUDQ6F",
+      "infoPlist": {
+        "NSSupportsLiveActivities": true
+      }
     },
     "android": {
       "package": "com.captainnate.ember",
@@ -29,12 +32,14 @@
     },
     "plugins": [
       "expo-router",
+      "@bacons/apple-targets",
+      "expo-notifications",
       [
         "expo-splash-screen",
         {
           "backgroundColor": "#0B0D14",
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "image": "./assets/images/icon-ember.png",
+          "imageWidth": 160
         }
       ]
     ],

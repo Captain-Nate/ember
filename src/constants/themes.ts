@@ -1,6 +1,13 @@
 import { FlameColors, LIVE_COLORS } from '@/components/flame';
 
-export type ThemeId = 'ember' | 'verdant' | 'glacier' | 'amethyst';
+export type ThemeId =
+  | 'ember'
+  | 'verdant'
+  | 'glacier'
+  | 'amethyst'
+  | 'rose'
+  | 'sapphire'
+  | 'moonlight';
 
 export interface Theme {
   id: ThemeId;
@@ -71,6 +78,59 @@ export const THEMES: Record<ThemeId, Theme> = {
       glow: '#AB70F0',
     },
   },
+  rose: {
+    id: 'rose',
+    name: 'Rose',
+    accent: '#FB8CC3',
+    accentDeep: '#C2276E',
+    buttonInk: '#330B22',
+    flame: {
+      bodyTop: '#FFC9E0',
+      bodyMid: '#F877B4',
+      bodyBottom: '#D6367F',
+      innerTop: '#FFEFF7',
+      innerBottom: '#FBAFD4',
+      face: '#4A1030',
+      cheek: '#F06CA8',
+      glow: '#F877B4',
+    },
+  },
+  sapphire: {
+    id: 'sapphire',
+    name: 'Sapphire',
+    accent: '#7C96FA',
+    accentDeep: '#2E45D4',
+    buttonInk: '#0C1440',
+    flame: {
+      bodyTop: '#9DBEFF',
+      bodyMid: '#5B7BF7',
+      bodyBottom: '#2E45D4',
+      innerTop: '#E3ECFF',
+      innerBottom: '#8FA8FB',
+      face: '#101B4E',
+      cheek: '#4C6BEB',
+      glow: '#5B7BF7',
+    },
+  },
+  moonlight: {
+    id: 'moonlight',
+    name: 'Moonlight',
+    accent: '#D5DCE8',
+    accentDeep: '#7A87A0',
+    buttonInk: '#171B26',
+    flame: {
+      bodyTop: '#F4F6FA',
+      bodyMid: '#C7CEDC',
+      bodyBottom: '#8E99B0',
+      innerTop: '#FFFFFF',
+      innerBottom: '#DFE5EF',
+      face: '#2A3040',
+      cheek: '#AAB4C8',
+      glow: '#C7CEDC',
+    },
+  },
 };
 
 export const THEME_IDS = Object.keys(THEMES) as ThemeId[];
+
+export const THEME_STORAGE_KEY = 'ember.theme.v1';

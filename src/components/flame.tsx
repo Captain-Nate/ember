@@ -21,6 +21,10 @@ interface FlameProps {
 
 const HAPPY_SWELL = 1.08;
 
+// SVG gradient ids are document-global on web; multiple Flame instances
+// (e.g. the shop's theme rows) must not collide.
+let flameInstanceCounter = 0;
+
 const USE_NATIVE_DRIVER = Platform.OS !== 'web';
 
 export interface FlameColors {
@@ -68,6 +72,10 @@ export function Flame({ mood, size = 160, colors: themeColors }: FlameProps) {
   const sway = useRef(new Animated.Value(0)).current;
   const glowPulse = useRef(new Animated.Value(0)).current;
   const [eyesClosed, setEyesClosed] = useState(false);
+  const [uid] = useState(() => {
+    flameInstanceCounter += 1;
+    return `flame${flameInstanceCounter}`;
+  });
 
   useEffect(() => {
     const flickerLoop = Animated.loop(
@@ -150,13 +158,13 @@ export function Flame({ mood, size = 160, colors: themeColors }: FlameProps) {
       >
         <Svg width={glowSize} height={glowSize} viewBox="0 0 100 100">
           <Defs>
-            <RadialGradient id="glow" cx="50%" cy="55%" r="50%">
+            <RadialGradient id={`${uid}-glow`} cx="50%" cy="55%" r="50%">
               <Stop offset="0%" stopColor={colors.glow} stopOpacity={0.55} />
               <Stop offset="70%" stopColor={colors.glow} stopOpacity={0.16} />
               <Stop offset="100%" stopColor={colors.glow} stopOpacity={0} />
             </RadialGradient>
           </Defs>
-          <Circle cx={50} cy={50} r={50} fill="url(#glow)" />
+          <Circle cx={50} cy={50} r={50} fill={`url(#${uid}-glow)`} />
         </Svg>
       </Animated.View>
 
@@ -169,12 +177,12 @@ export function Flame({ mood, size = 160, colors: themeColors }: FlameProps) {
       >
         <Svg width={size} height={height} viewBox="0 0 200 240">
           <Defs>
-            <LinearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+            <LinearGradient id={`${uid}-body`} x1="0" y1="0" x2="0" y2="1">
               <Stop offset="0" stopColor={colors.bodyTop} />
               <Stop offset="0.55" stopColor={colors.bodyMid} />
               <Stop offset="1" stopColor={colors.bodyBottom} />
             </LinearGradient>
-            <LinearGradient id="inner" x1="0" y1="0" x2="0" y2="1">
+            <LinearGradient id={`${uid}-inner`} x1="0" y1="0" x2="0" y2="1">
               <Stop offset="0" stopColor={colors.innerTop} />
               <Stop offset="1" stopColor={colors.innerBottom} />
             </LinearGradient>
@@ -182,41 +190,41 @@ export function Flame({ mood, size = 160, colors: themeColors }: FlameProps) {
 
           {/* outer flame */}
           <Path
-            d="M100 18 C96 60 42 96 42 156 C42 202 68 226 100 226 C132 226 158 202 158 156 C158 96 104 60 100 18 Z"
-            fill="url(#body)"
+            d="M100 18 C95.5 60 35 96 35 156 C35 202 64.2 226 100 226 C135.8 226 165 202 165 156 C165 96 104.5 60 100 18 Z"
+            fill={`url(#${uid}-body)`}
           />
           {/* inner flame */}
           <Path
-            d="M100 78 C97 104 66 122 66 162 C66 192 82 206 100 206 C118 206 134 192 134 162 C134 122 103 104 100 78 Z"
-            fill="url(#inner)"
+            d="M100 78 C96.6 104 61.9 122 61.9 162 C61.9 192 79.8 206 100 206 C120.2 206 138.1 192 138.1 162 C138.1 122 103.4 104 100 78 Z"
+            fill={`url(#${uid}-inner)`}
             opacity={0.9}
           />
 
           {/* face */}
           {mood === 'happy' ? (
             <>
-              <Path d="M66 148 Q78 136 90 148" stroke={colors.face} strokeWidth={5.5} strokeLinecap="round" fill="none" />
-              <Path d="M110 148 Q122 136 134 148" stroke={colors.face} strokeWidth={5.5} strokeLinecap="round" fill="none" />
-              <Path d="M84 170 Q100 194 116 170 Z" fill="#7A3414" />
+              <Path d="M61.9 148 Q75.4 136 88.8 148" stroke={colors.face} strokeWidth={5.5} strokeLinecap="round" fill="none" />
+              <Path d="M111.2 148 Q124.6 136 138.1 148" stroke={colors.face} strokeWidth={5.5} strokeLinecap="round" fill="none" />
+              <Path d="M82.1 170 Q100 194 117.9 170 Z" fill="#7A3414" />
             </>
           ) : mood === 'doused' ? (
             <>
-              <Path d="M70 140 L86 156 M86 140 L70 156" stroke={colors.face} strokeWidth={5} strokeLinecap="round" />
-              <Path d="M114 140 L130 156 M130 140 L114 156" stroke={colors.face} strokeWidth={5} strokeLinecap="round" />
-              <Path d="M86 186 Q100 174 114 186" stroke={colors.face} strokeWidth={5} strokeLinecap="round" fill="none" />
+              <Path d="M66.4 140 L84.3 156 M84.3 140 L66.4 156" stroke={colors.face} strokeWidth={5} strokeLinecap="round" />
+              <Path d="M115.7 140 L133.6 156 M133.6 140 L115.7 156" stroke={colors.face} strokeWidth={5} strokeLinecap="round" />
+              <Path d="M84.3 186 Q100 174 115.7 186" stroke={colors.face} strokeWidth={5} strokeLinecap="round" fill="none" />
             </>
           ) : (
             <>
-              <Ellipse cx={78} cy={148} rx={7.5} ry={eyeRy} fill={colors.face} />
-              <Ellipse cx={122} cy={148} rx={7.5} ry={eyeRy} fill={colors.face} />
-              <Path d="M86 176 Q100 187 114 176" stroke={colors.face} strokeWidth={5} strokeLinecap="round" fill="none" />
+              <Ellipse cx={75.4} cy={148} rx={7.5} ry={eyeRy} fill={colors.face} />
+              <Ellipse cx={124.6} cy={148} rx={7.5} ry={eyeRy} fill={colors.face} />
+              <Path d="M84.3 176 Q100 187 115.7 176" stroke={colors.face} strokeWidth={5} strokeLinecap="round" fill="none" />
             </>
           )}
 
           {(mood === 'idle' || mood === 'focused' || mood === 'happy') && (
             <>
-              <Circle cx={64} cy={166} r={6} fill={colors.cheek} opacity={0.45} />
-              <Circle cx={136} cy={166} r={6} fill={colors.cheek} opacity={0.45} />
+              <Circle cx={59.7} cy={166} r={6} fill={colors.cheek} opacity={0.45} />
+              <Circle cx={140.3} cy={166} r={6} fill={colors.cheek} opacity={0.45} />
             </>
           )}
         </Svg>
