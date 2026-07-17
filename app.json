@@ -41,7 +41,8 @@
           "image": "./assets/images/icon-ember.png",
           "imageWidth": 160
         }
-      ]
+      ],
+      "expo-iap"
     ],
     "experiments": {
       "typedRoutes": true,

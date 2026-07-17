@@ -8,18 +8,12 @@ import Svg, { Path, Rect } from 'react-native-svg';
 import { Candle } from '@/components/candle';
 import { Flame, FlameMood } from '@/components/flame';
 import { ProgressRing } from '@/components/progress-ring';
+import { UnlockBurst } from '@/components/unlock-burst';
 import { palette } from '@/constants/palette';
 import { THEME_IDS, THEME_STORAGE_KEY, THEMES, ThemeId } from '@/constants/themes';
 import { formatMs, useFocusTimer } from '@/hooks/use-focus-timer';
-import {
-  BUNDLE_PRICE_LABEL,
-  confirmDialog,
-  grandfatherTheme,
-  loadOwnedThemes,
-  THEME_PRICE_LABEL,
-  unlockAllThemes,
-  unlockTheme,
-} from '@/lib/entitlements';
+import { useThemeShop } from '@/hooks/use-theme-shop';
+import { grandfatherTheme, loadOwnedThemes } from '@/lib/entitlements';
 
 const PRESETS = [15, 25, 50];
 const CUSTOM_KEY = 'ember.customMin.v1';
@@ -79,6 +73,8 @@ export default function FocusScreen() {
         setThemeId(stored);
       }
       setOwned(nextOwned);
+      prevOwnedRef.current = nextOwned;
+      storageReadyRef.current = true;
     })();
   }, []);
 
@@ -96,31 +92,29 @@ export default function FocusScreen() {
 
   const isPreviewing = !owned.includes(themeId);
 
-  const selectTheme = (id: ThemeId) => {
-    setThemeId(id); // locked themes apply as a live preview; only owned picks persist
-    if (owned.includes(id)) {
-      AsyncStorage.setItem(THEME_STORAGE_KEY, id).catch(() => {});
+  const shop = useThemeShop(useCallback((nextOwned: ThemeId[]) => setOwned(nextOwned), []));
+
+  // A theme the user is looking at just became owned → celebrate the unlock.
+  const [celebrating, setCelebrating] = useState(false);
+  const prevOwnedRef = useRef<ThemeId[]>(owned);
+  useEffect(() => {
+    const wasOwned = prevOwnedRef.current.includes(themeId);
+    prevOwnedRef.current = owned;
+    if (storageReadyRef.current && !wasOwned && owned.includes(themeId)) {
+      setCelebrating(true);
     }
-  };
+  }, [owned, themeId]);
 
-  const unlockCurrent = async () => {
-    const ok = await confirmDialog(
-      `Unlock ${theme.name}?`,
-      `${THEME_PRICE_LABEL} — adds a new flame and candle color.`,
-    );
-    if (!ok) return;
-    setOwned(await unlockTheme(themeId));
-    AsyncStorage.setItem(THEME_STORAGE_KEY, themeId).catch(() => {});
-  };
+  // Persist the selection whenever it points at an owned theme (previews never persist).
+  const storageReadyRef = useRef(false);
+  useEffect(() => {
+    if (storageReadyRef.current && owned.includes(themeId)) {
+      AsyncStorage.setItem(THEME_STORAGE_KEY, themeId).catch(() => {});
+    }
+  }, [owned, themeId]);
 
-  const unlockBundle = async () => {
-    const ok = await confirmDialog(
-      'Unlock all themes?',
-      `${BUNDLE_PRICE_LABEL} — every theme, including all future ones.`,
-    );
-    if (!ok) return;
-    setOwned(await unlockAllThemes());
-    AsyncStorage.setItem(THEME_STORAGE_KEY, themeId).catch(() => {});
+  const selectTheme = (id: ThemeId) => {
+    setThemeId(id); // locked themes apply as a live preview
   };
 
   const adjustCustom = (delta: number) => {
@@ -162,15 +156,27 @@ export default function FocusScreen() {
       </View>
 
       <View style={styles.center}>
-        <ProgressRing
-          size={284}
-          strokeWidth={12}
-          progress={timer.progress}
-          from={theme.accent}
-          to={theme.accentDeep}
-        >
-          <Flame mood={MOOD_BY_STATUS[status]} size={150} colors={theme.flame} />
-        </ProgressRing>
+        <View>
+          <ProgressRing
+            size={284}
+            strokeWidth={12}
+            progress={timer.progress}
+            from={theme.accent}
+            to={theme.accentDeep}
+          >
+            <Flame
+              mood={celebrating ? 'happy' : MOOD_BY_STATUS[status]}
+              size={150}
+              colors={theme.flame}
+            />
+          </ProgressRing>
+          {celebrating && (
+            <UnlockBurst
+              colors={[theme.accent, theme.flame.bodyMid, theme.flame.innerTop]}
+              onDone={() => setCelebrating(false)}
+            />
+          )}
+        </View>
 
         <Text style={styles.time}>{formatMs(timer.remainingMs)}</Text>
         <Text style={styles.statusLine}>{statusLine}</Text>
@@ -314,10 +320,10 @@ export default function FocusScreen() {
           (isPreviewing ? (
             <Pressable
               style={[styles.primaryBtn, { backgroundColor: theme.accent }]}
-              onPress={unlockCurrent}
+              onPress={() => shop.buyTheme(themeId)}
             >
               <Text style={[styles.primaryBtnText, { color: theme.buttonInk }]}>
-                Unlock {theme.name} · {THEME_PRICE_LABEL}
+                Unlock {theme.name} · {shop.priceFor(themeId)}
               </Text>
             </Pressable>
           ) : (
@@ -358,9 +364,9 @@ export default function FocusScreen() {
             </Text>
           )}
           {status === 'idle' && isPreviewing && (
-            <Pressable onPress={unlockBundle}>
+            <Pressable onPress={shop.buyBundle}>
               <Text style={[styles.footerHint, styles.bundleLink]}>
-                or get all themes · {BUNDLE_PRICE_LABEL}
+                or get all themes · {shop.priceFor('bundle')}
               </Text>
             </Pressable>
           )}

@@ -1,33 +1,38 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useState } from 'react';
-import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useRef, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Flame } from '@/components/flame';
 import { palette } from '@/constants/palette';
 import { THEME_IDS, THEME_STORAGE_KEY, THEMES, ThemeId } from '@/constants/themes';
-import {
-  BUNDLE_PRICE_LABEL,
-  confirmDialog,
-  FREE_THEME,
-  loadOwnedThemes,
-  THEME_PRICE_LABEL,
-  unlockAllThemes,
-  unlockTheme,
-} from '@/lib/entitlements';
-
-function infoDialog(message: string): void {
-  if (Platform.OS === 'web') {
-    window.alert(message);
-  } else {
-    Alert.alert('', message);
-  }
-}
+import { confirmDialog, FREE_THEME, loadOwnedThemes } from '@/lib/entitlements';
+import { useThemeShop } from '@/hooks/use-theme-shop';
 
 export default function ShopScreen() {
   const [owned, setOwned] = useState<ThemeId[]>([FREE_THEME]);
   const [selectedId, setSelectedId] = useState<ThemeId>(FREE_THEME);
+  const pendingSelectRef = useRef<ThemeId | null>(null);
+
+  const select = useCallback((id: ThemeId) => {
+    setSelectedId(id);
+    AsyncStorage.setItem(THEME_STORAGE_KEY, id).catch(() => {});
+  }, []);
+
+  const shop = useThemeShop(
+    useCallback(
+      (nextOwned: ThemeId[]) => {
+        setOwned(nextOwned);
+        const pending = pendingSelectRef.current;
+        if (pending && nextOwned.includes(pending)) {
+          pendingSelectRef.current = null;
+          select(pending);
+        }
+      },
+      [select],
+    ),
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -42,28 +47,9 @@ export default function ShopScreen() {
 
   const ownsAll = THEME_IDS.every((id) => owned.includes(id));
 
-  const select = (id: ThemeId) => {
-    setSelectedId(id);
-    AsyncStorage.setItem(THEME_STORAGE_KEY, id).catch(() => {});
-  };
-
-  const buyTheme = async (id: ThemeId) => {
-    const ok = await confirmDialog(
-      `Unlock ${THEMES[id].name}?`,
-      `${THEME_PRICE_LABEL} — adds a new flame and candle color.`,
-    );
-    if (!ok) return;
-    setOwned(await unlockTheme(id));
-    select(id);
-  };
-
-  const buyBundle = async () => {
-    const ok = await confirmDialog(
-      'Unlock all themes?',
-      `${BUNDLE_PRICE_LABEL} — every theme, including all future ones.`,
-    );
-    if (!ok) return;
-    setOwned(await unlockAllThemes());
+  const buyTheme = (id: ThemeId) => {
+    pendingSelectRef.current = id;
+    shop.buyTheme(id);
   };
 
   return (
@@ -72,7 +58,22 @@ export default function ShopScreen() {
         <Pressable style={styles.backBtn} onPress={() => router.back()}>
           <Text style={styles.backText}>‹ Back</Text>
         </Pressable>
-        <Text style={styles.title}>Theme shop</Text>
+        <Text
+          style={styles.title}
+          onLongPress={
+            __DEV__
+              ? async () => {
+                  // dev-only escape hatch for purchase testing
+                  const ok = await confirmDialog('Reset entitlements?', 'Dev only.', 'Reset');
+                  if (!ok) return;
+                  await AsyncStorage.removeItem('ember.entitlements.v1');
+                  setOwned([FREE_THEME]);
+                }
+              : undefined
+          }
+        >
+          Theme shop
+        </Text>
         <View style={styles.headerSpacer} />
       </View>
 
@@ -81,7 +82,7 @@ export default function ShopScreen() {
       <ScrollView contentContainerStyle={styles.list}>
         <Pressable
           style={[styles.bundleCard, ownsAll && styles.bundleCardOwned]}
-          onPress={ownsAll ? undefined : buyBundle}
+          onPress={ownsAll ? undefined : shop.buyBundle}
         >
           <View style={styles.bundleDots}>
             {(['verdant', 'glacier', 'amethyst', 'rose', 'sapphire', 'moonlight'] as ThemeId[]).map(
@@ -99,7 +100,7 @@ export default function ShopScreen() {
           ) : (
             <View style={[styles.pricePill, { backgroundColor: THEMES.amethyst.accent }]}>
               <Text style={[styles.pricePillText, { color: THEMES.amethyst.buttonInk }]}>
-                {BUNDLE_PRICE_LABEL}
+                {shop.priceFor('bundle')}
               </Text>
             </View>
           )}
@@ -134,7 +135,7 @@ export default function ShopScreen() {
               ) : (
                 <View style={[styles.pricePill, { backgroundColor: theme.accent }]}>
                   <Text style={[styles.pricePillText, { color: theme.buttonInk }]}>
-                    {THEME_PRICE_LABEL}
+                    {shop.priceFor(id)}
                   </Text>
                 </View>
               )}
@@ -142,11 +143,7 @@ export default function ShopScreen() {
           );
         })}
 
-        <Pressable
-          onPress={() =>
-            infoDialog('Purchase restoring arrives with the App Store version of Ember.')
-          }
-        >
+        <Pressable onPress={shop.restore}>
           <Text style={styles.restore}>Restore purchases</Text>
         </Pressable>
       </ScrollView>

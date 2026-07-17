@@ -9,6 +9,26 @@ export const FREE_THEME: ThemeId = 'ember';
 export const THEME_PRICE_LABEL = '$0.99';
 export const BUNDLE_PRICE_LABEL = '$2.99';
 
+export const BUNDLE_PRODUCT_ID = 'com.captainnate.ember.themes.all';
+
+export function themeProductId(id: ThemeId): string {
+  return `com.captainnate.ember.theme.${id}`;
+}
+
+export function themeIdForProduct(productId: string): ThemeId | 'bundle' | null {
+  if (productId === BUNDLE_PRODUCT_ID) return 'bundle';
+  const match = productId.match(/^com\.captainnate\.ember\.theme\.(\w+)$/);
+  if (match && match[1] in THEMES) return match[1] as ThemeId;
+  return null;
+}
+
+export const ALL_PRODUCT_IDS = [
+  ...(Object.keys(THEMES) as ThemeId[])
+    .filter((id) => id !== FREE_THEME)
+    .map(themeProductId),
+  BUNDLE_PRODUCT_ID,
+];
+
 /**
  * Dev switch (à la 1MS TESTING_ADS): true = every theme unlocked, no shop friction.
  * Phase 2 replaces the stubbed unlocks below with react-native-iap purchases;
@@ -57,6 +77,15 @@ export async function unlockAllThemes(): Promise<ThemeId[]> {
 /** Pre-shop installs may have a now-locked theme selected — let them keep it. */
 export async function grandfatherTheme(id: ThemeId): Promise<ThemeId[]> {
   return unlockTheme(id);
+}
+
+/** Cross-platform info popup (RN Alert is a no-op on web). */
+export function infoDialog(message: string): void {
+  if (Platform.OS === 'web') {
+    window.alert(message);
+  } else {
+    Alert.alert('', message);
+  }
 }
 
 /** Cross-platform confirm (RN Alert is a no-op on web). */
