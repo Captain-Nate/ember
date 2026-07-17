@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { DevSettings, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Flame } from '@/components/flame';
@@ -136,18 +136,26 @@ export default function ShopScreen() {
           <Pressable
             onPress={async () => {
               const ok = await confirmDialog(
-                'Reset purchases?',
-                'Dev only — clears local unlocks and reselects Ember.',
-                'Reset',
+                'Reset ALL data?',
+                'Dev only — wipes purchases, theme, streak, candles, and settings, then reloads. Like a fresh install.',
+                'Reset everything',
               );
               if (!ok) return;
-              await AsyncStorage.removeItem('ember.entitlements.v1');
-              await AsyncStorage.setItem(THEME_STORAGE_KEY, FREE_THEME).catch(() => {});
-              setSelectedId(FREE_THEME);
-              setOwned([FREE_THEME]);
+              await AsyncStorage.multiRemove([
+                'ember.entitlements.v1',
+                'ember.theme.v1',
+                'ember.stats.v1',
+                'ember.sessions.v1',
+                'ember.customMin.v1',
+              ]).catch(() => {});
+              if (Platform.OS === 'web') {
+                window.location.href = '/';
+              } else {
+                DevSettings.reload();
+              }
             }}
           >
-            <Text style={styles.devReset}>Reset purchases (dev)</Text>
+            <Text style={styles.devReset}>Reset all data (dev)</Text>
           </Pressable>
         )}
       </ScrollView>
