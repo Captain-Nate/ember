@@ -45,27 +45,28 @@ policy URL. Both pages are written and live in [`docs/`](docs/).
 Apple's 6.9" iPhone slot needs **1290×2796 or 1320×2868**. Your iPhone 15 Pro is
 1179×2556 — **not accepted**, so these have to come from a simulator.
 
-- [ ] Build for the iPhone 16 Pro Max simulator
-      (`npx expo run:ios --device "iPhone 16 Pro Max"`)
-- [ ] Capture 5, in this order (this is also the order they appear on the page):
-      1. **Flame mid-session** — timer running, the hero shot
-      2. **Candle collection** — a full-ish shelf, the thing people don't expect
-      3. **Theme picker** — swatches visible, shows the range
-      4. **Shop** — needed for IAP review screenshots anyway
-      5. **Done screen** — "Ember has lit a new candle for your collection"
-- [ ] `xcrun simctl io booted screenshot ~/Desktop/ember-shot-N.png`
+Captured 2026-07-22 into `~/Desktop/ember-screenshots/` at native
+1320×2868 (iPhone 16 Pro Max sim, seeded 22-session history, 9:41 status bar):
 
-Seed a few sessions first so the candle shelf isn't empty — an empty shelf is a
-bad first screenshot.
+- [x] `01-flame-session.png` — mid-session, "The flame is lit — stay with it"
+- [x] `02-candle-collection.png` — 20 lit · 2 snuffed shelf
+- [x] `03-theme-preview.png` — Glacier preview, "Unlock Glacier · $0.99"
+- [x] `04-theme-shop.png` — all 7 products with live StoreKit prices
+- [ ] `05-done-screen.png` — "Ember has lit a new candle"
+- [x] `06-doused-bonus.png` — spare (stakes shot; optional in listing)
+
+Upload order on the listing: 01, 02, 03, 04, 05.
 
 ### IAP review screenshots (7)
 
 Apple only wants an image showing **where the purchase appears in the app**. It
-does *not* have to be the purchase sheet. So: take one clean shop screenshot and
-crop the relevant row seven times.
+does *not* have to be the purchase sheet. Upload the SAME full shop screenshot
+(`04-theme-shop.png`, shows all 7 products with prices) for each of the 7
+products — standard practice, and full-size device screenshots avoid any
+dimension-rejection risk that cropped rows would carry.
 
 - [ ] verdant · [ ] glacier · [ ] amethyst · [ ] rose · [ ] sapphire ·
-      [ ] moonlight · [ ] the all-themes bundle card
+      [ ] moonlight · [ ] the all-themes bundle
 
 ---
 
