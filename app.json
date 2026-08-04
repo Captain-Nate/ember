@@ -11,9 +11,18 @@
     "ios": {
       "icon": "./assets/images/icon-ember.png",
       "bundleIdentifier": "com.captainnate.ember",
+      "buildNumber": "2",
       "appleTeamId": "7Y5KKUDQ6F",
+      "supportsTablet": true,
       "infoPlist": {
-        "NSSupportsLiveActivities": true
+        "NSSupportsLiveActivities": true,
+        "ITSAppUsesNonExemptEncryption": false,
+        "UISupportedInterfaceOrientations~ipad": [
+          "UIInterfaceOrientationPortrait",
+          "UIInterfaceOrientationPortraitUpsideDown",
+          "UIInterfaceOrientationLandscapeLeft",
+          "UIInterfaceOrientationLandscapeRight"
+        ]
       }
     },
     "android": {
@@ -36,7 +45,9 @@
       [
         "expo-notifications",
         {
-          "sounds": ["./assets/sounds/ember-complete.wav"]
+          "sounds": [
+            "./assets/sounds/ember-complete.wav"
+          ]
         }
       ],
       [
@@ -48,7 +59,15 @@
         }
       ],
       "expo-iap",
-      "expo-audio"
+      [
+        "expo-audio",
+        {
+          "enableBackgroundPlayback": false,
+          "enableBackgroundRecording": false,
+          "recordAudioAndroid": false,
+          "microphonePermission": false
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

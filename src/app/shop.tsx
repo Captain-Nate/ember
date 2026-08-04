@@ -5,6 +5,7 @@ import { DevSettings, Platform, Pressable, ScrollView, StyleSheet, Text, View } 
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Flame } from '@/components/flame';
+import { CONTENT_MAX_WIDTH, HEADER_TOP_PAD, padSize } from '@/constants/layout';
 import { palette } from '@/constants/palette';
 import { THEME_IDS, THEME_STORAGE_KEY, THEMES, ThemeId } from '@/constants/themes';
 import { confirmDialog, FREE_THEME, loadOwnedThemes } from '@/lib/entitlements';
@@ -108,7 +109,7 @@ export default function ShopScreen() {
                 }
               }}
             >
-              <Flame mood="idle" size={34} colors={theme.flame} />
+              <Flame mood="idle" size={padSize(34)} colors={theme.flame} />
               <View style={styles.rowBody}>
                 <Text style={styles.rowName}>{theme.name}</Text>
                 {isSelected && <Text style={styles.rowCaption}>Selected</Text>}
@@ -169,43 +170,51 @@ const styles = StyleSheet.create({
     backgroundColor: palette.bg,
   },
   header: {
+    width: '100%',
+    maxWidth: CONTENT_MAX_WIDTH,
+    alignSelf: 'center',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 24,
-    paddingTop: 10,
+    paddingTop: HEADER_TOP_PAD,
   },
   backBtn: {
     backgroundColor: palette.card,
     borderColor: palette.cardBorder,
     borderWidth: 1,
     borderRadius: 999,
-    paddingVertical: 7,
+    paddingVertical: padSize(7),
     paddingHorizontal: 14,
-    minWidth: 76,
+    minWidth: padSize(76),
     alignItems: 'center',
   },
   backText: {
     color: palette.ink,
-    fontSize: 15,
+    fontSize: padSize(15),
     fontWeight: '600',
   },
   title: {
     color: palette.ink,
-    fontSize: 17,
+    fontSize: padSize(17),
     fontWeight: '700',
   },
   headerSpacer: {
-    minWidth: 76,
+    minWidth: padSize(76),
   },
   subtitle: {
     color: palette.inkDim,
-    fontSize: 13,
+    fontSize: padSize(13),
     textAlign: 'center',
     marginTop: 12,
     paddingHorizontal: 40,
+    maxWidth: CONTENT_MAX_WIDTH,
+    alignSelf: 'center',
   },
   list: {
+    width: '100%',
+    maxWidth: CONTENT_MAX_WIDTH,
+    alignSelf: 'center',
     paddingHorizontal: 24,
     paddingTop: 18,
     paddingBottom: 40,
@@ -219,7 +228,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: THEMES.amethyst.accent,
     borderRadius: 14,
-    paddingVertical: 14,
+    paddingVertical: padSize(14),
     paddingHorizontal: 14,
     marginBottom: 6,
   },
@@ -231,9 +240,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   bundleDot: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
+    width: padSize(14),
+    height: padSize(14),
+    borderRadius: padSize(14) / 2,
     marginRight: -4,
     borderWidth: 1,
     borderColor: palette.bg,
@@ -244,7 +253,7 @@ const styles = StyleSheet.create({
     gap: 12,
     backgroundColor: palette.card,
     borderRadius: 12,
-    paddingVertical: 10,
+    paddingVertical: padSize(10),
     paddingHorizontal: 14,
   },
   rowBody: {
@@ -252,37 +261,37 @@ const styles = StyleSheet.create({
   },
   rowName: {
     color: palette.ink,
-    fontSize: 15,
+    fontSize: padSize(15),
     fontWeight: '600',
   },
   rowCaption: {
     color: palette.inkDim,
-    fontSize: 11,
+    fontSize: padSize(11),
     marginTop: 1,
   },
   ownedLabel: {
     color: palette.inkDim,
-    fontSize: 13,
+    fontSize: padSize(13),
   },
   pricePill: {
     borderRadius: 999,
-    paddingVertical: 6,
+    paddingVertical: padSize(6),
     paddingHorizontal: 13,
   },
   pricePillText: {
-    fontSize: 13,
+    fontSize: padSize(13),
     fontWeight: '700',
   },
   restore: {
     color: palette.inkDim,
-    fontSize: 12,
+    fontSize: padSize(12),
     textAlign: 'center',
     textDecorationLine: 'underline',
     marginTop: 14,
   },
   devReset: {
     color: palette.danger,
-    fontSize: 12,
+    fontSize: padSize(12),
     textAlign: 'center',
     textDecorationLine: 'underline',
     marginTop: 12,

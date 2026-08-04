@@ -1,14 +1,30 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, useFocusEffect } from 'expo-router';
 import { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
-import { Animated, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {
+  Animated,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Rect } from 'react-native-svg';
 
 import { Candle } from '@/components/candle';
 import { Flame, FlameMood } from '@/components/flame';
 import { ProgressRing } from '@/components/progress-ring';
 import { UnlockBurst } from '@/components/unlock-burst';
+import {
+  CONTENT_MAX_WIDTH,
+  HEADER_TOP_PAD,
+  IS_PAD,
+  lineHeightFor,
+  padSize,
+} from '@/constants/layout';
 import { palette } from '@/constants/palette';
 import { THEME_IDS, THEME_STORAGE_KEY, THEMES, ThemeId } from '@/constants/themes';
 import { formatMs, useFocusTimer } from '@/hooks/use-focus-timer';
@@ -19,6 +35,48 @@ const PRESETS = [15, 25, 50];
 const CUSTOM_KEY = 'ember.customMin.v1';
 const CUSTOM_MIN = 1;
 const CUSTOM_MAX = 180;
+
+// Art sizes on a tall phone. The ring/flame/clock shrink together on short
+// screens (iPhone SE, and iPhone compatibility mode on iPad) so the header and
+// the controls below never get overlapped. The controls themselves never
+// scale — they'd drop under the 44pt tap target.
+const RING_BASE = 284;
+const FLAME_BASE = 150;
+const TIME_BASE = 56;
+const TIME_LINE_RATIO = 1.2;
+// Control metrics. Each goes through padSize() so iPad gets larger type AND
+// correspondingly larger tap targets. The vertical-chrome totals below are
+// derived from these rather than hard-coded, so they cannot drift out of sync
+// with the stylesheet and silently reintroduce the overlap this fixes.
+const GAP = padSize(18);
+const PRESET_H = padSize(40);
+const STEPPER_H = padSize(44);
+const SWATCH = padSize(26);
+const SWATCH_ROW_H = padSize(30);
+const CHIP_PAD_V = padSize(7);
+const CHIP_FONT = padSize(15);
+const STATUS_FONT = padSize(15);
+const BTN_PAD_V = padSize(18);
+const BTN_FONT = padSize(17);
+const HINT_H = padSize(40);
+const FOOTER_PAD_BOTTOM = padSize(16);
+const CENTER_PAD_TOP = padSize(14);
+
+const HEADER_H = CHIP_PAD_V * 2 + lineHeightFor(CHIP_FONT) + 2; // +2 chip border
+const SLOT_H = PRESET_H + STEPPER_H + SWATCH_ROW_H + GAP * 2;
+const CONTROLS_H = lineHeightFor(STATUS_FONT) + SLOT_H + GAP * 3 + CENTER_PAD_TOP;
+const FOOTER_H = BTN_PAD_V * 2 + lineHeightFor(BTN_FONT) + 3 + HINT_H + FOOTER_PAD_BOTTOM;
+// Slack held back from the art so a short screen still shows a clear gap
+// between the swatches and the primary button, rather than an exact fit.
+const ART_BREATHING_ROOM = 32;
+const COLUMN_GUTTER = 48;
+// Only iPad is allowed to grow the art past the phone design — scaling up on
+// a big iPhone would change the layout the App Store screenshots were shot on.
+const MAX_ART_SCALE_PAD = 1.35;
+// Floor low enough that a short landscape iPad can still shrink the art until
+// everything fits. Above ~0.39 the 11" landscape canvas cannot hold the art
+// plus the control stack, and the content would spill over the footer button.
+const MIN_ART_SCALE = 0.35;
 
 const MOOD_BY_STATUS: Record<string, FlameMood> = {
   idle: 'idle',
@@ -52,6 +110,30 @@ export default function FocusScreen() {
   const { status } = timer;
   const [customMin, setCustomMin] = useState(30);
   const [customActive, setCustomActive] = useState(false);
+
+  const { height: winHeight, width: winWidth } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
+  const headerHeight = HEADER_H + HEADER_TOP_PAD;
+  const roomForArt =
+    winHeight -
+    insets.top -
+    insets.bottom -
+    headerHeight -
+    FOOTER_H -
+    CONTROLS_H -
+    ART_BREATHING_ROOM;
+  const columnWidth = Math.min(winWidth - COLUMN_GUTTER, CONTENT_MAX_WIDTH);
+  const artScale = Math.max(
+    MIN_ART_SCALE,
+    Math.min(
+      IS_PAD ? MAX_ART_SCALE_PAD : 1,
+      roomForArt / (RING_BASE + TIME_BASE * TIME_LINE_RATIO),
+      columnWidth / RING_BASE,
+    ),
+  );
+  const ringSize = Math.round(RING_BASE * artScale);
+  const flameSize = Math.round(FLAME_BASE * artScale);
+  const timeFont = Math.round(TIME_BASE * artScale);
 
   useEffect(() => {
     AsyncStorage.getItem(CUSTOM_KEY)
@@ -146,30 +228,37 @@ export default function FocusScreen() {
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'bottom']}>
-      <View style={styles.header}>
-        <Text style={[styles.wordmark, { color: theme.accent }]}>ember</Text>
-        <View style={styles.headerRight}>
-          <Pressable style={styles.streakChip} onPress={() => router.push('/collection')}>
-            <Text style={styles.streakText}>Candles</Text>
-          </Pressable>
-          <Pressable style={styles.streakChip} onPress={() => router.push('/shop')}>
-            <Text style={styles.streakText}>Shop</Text>
-          </Pressable>
+      <View style={[styles.headerBar, { paddingTop: HEADER_TOP_PAD }]}>
+        <View style={[styles.headerInner, { maxWidth: CONTENT_MAX_WIDTH }]}>
+          <Text style={[styles.wordmark, { color: theme.accent }]}>ember</Text>
+          <View style={styles.headerRight}>
+            <Pressable style={styles.streakChip} onPress={() => router.push('/collection')}>
+              <Text style={styles.streakText}>Candles</Text>
+            </Pressable>
+            <Pressable style={styles.streakChip} onPress={() => router.push('/shop')}>
+              <Text style={styles.streakText}>Shop</Text>
+            </Pressable>
+          </View>
         </View>
       </View>
 
-      <View style={styles.center}>
+      <ScrollView
+        style={styles.centerScroll}
+        contentContainerStyle={styles.centerContent}
+        showsVerticalScrollIndicator={false}
+      >
+      <View style={[styles.center, { maxWidth: CONTENT_MAX_WIDTH }]}>
         <View>
           <ProgressRing
-            size={284}
-            strokeWidth={12}
+            size={ringSize}
+            strokeWidth={Math.max(8, Math.round(12 * artScale))}
             progress={timer.progress}
             from={theme.accent}
             to={theme.accentDeep}
           >
             <Flame
               mood={celebrating ? 'happy' : MOOD_BY_STATUS[status]}
-              size={150}
+              size={flameSize}
               colors={theme.flame}
             />
           </ProgressRing>
@@ -181,7 +270,14 @@ export default function FocusScreen() {
           )}
         </View>
 
-        <Text style={styles.time}>{formatMs(timer.remainingMs)}</Text>
+        <Text
+          style={[
+            styles.time,
+            { fontSize: timeFont, lineHeight: Math.round(timeFont * TIME_LINE_RATIO) },
+          ]}
+        >
+          {formatMs(timer.remainingMs)}
+        </Text>
         <Text style={styles.statusLine}>{statusLine}</Text>
 
         <View style={styles.variableSlot}>
@@ -314,8 +410,10 @@ export default function FocusScreen() {
           )}
         </View>
       </View>
+      </ScrollView>
 
-      <View style={styles.footer}>
+      <View style={styles.footerBar}>
+        <View style={[styles.footerInner, { maxWidth: CONTENT_MAX_WIDTH }]}>
         {status === 'idle' &&
           (isPreviewing ? (
             <Pressable
@@ -360,7 +458,7 @@ export default function FocusScreen() {
         <View style={styles.hintSlot}>
           {status === 'running' && (
             <Text style={styles.footerHint}>
-              Leaving the app puts the flame out — locking your phone is safe
+              Leaving the app puts the flame out — locking your device is safe
             </Text>
           )}
           {status === 'idle' && isPreviewing && (
@@ -370,6 +468,7 @@ export default function FocusScreen() {
               </Text>
             </Pressable>
           )}
+        </View>
         </View>
       </View>
     </SafeAreaView>
@@ -381,16 +480,19 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: palette.bg,
   },
-  header: {
+  headerBar: {
+    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
+  headerInner: {
+    width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 24,
-    paddingTop: 10,
   },
   wordmark: {
     color: palette.amber,
-    fontSize: 22,
+    fontSize: padSize(22),
     fontWeight: '800',
     letterSpacing: 0.5,
   },
@@ -400,27 +502,39 @@ const styles = StyleSheet.create({
   },
   revealText: {
     color: palette.inkDim,
-    fontSize: 13,
+    fontSize: padSize(13),
   },
   streakChip: {
     backgroundColor: palette.card,
     borderColor: palette.cardBorder,
     borderWidth: 1,
     borderRadius: 999,
-    paddingVertical: 7,
-    paddingHorizontal: 14,
+    paddingVertical: CHIP_PAD_V,
+    paddingHorizontal: padSize(14),
   },
   streakText: {
     color: palette.ink,
-    fontSize: 15,
+    fontSize: CHIP_FONT,
     fontWeight: '700',
   },
-  center: {
+  centerScroll: {
     flex: 1,
+    overflow: 'hidden',
+  },
+  // flexGrow + centred justify means the content sits centred when it fits and
+  // scrolls instead of clipping when the window is too short (iPadOS resizing).
+  centerContent: {
+    flexGrow: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 18,
-    paddingTop: 14,
+    paddingHorizontal: 24,
+    paddingTop: CENTER_PAD_TOP,
+  },
+  center: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: GAP,
   },
   time: {
     color: palette.ink,
@@ -431,28 +545,28 @@ const styles = StyleSheet.create({
   },
   statusLine: {
     color: palette.inkDim,
-    fontSize: 15,
+    fontSize: STATUS_FONT,
   },
   variableSlot: {
-    height: 150,
+    height: SLOT_H,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 18,
+    gap: GAP,
   },
   presetRow: {
     flexDirection: 'row',
     gap: 10,
-    height: 40,
+    height: PRESET_H,
   },
   stepperRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    height: 44,
+    height: STEPPER_H,
   },
   stepperBtn: {
-    width: 46,
-    height: 44,
+    width: padSize(46),
+    height: STEPPER_H,
     borderRadius: 999,
     alignItems: 'center',
     justifyContent: 'center',
@@ -465,14 +579,14 @@ const styles = StyleSheet.create({
   },
   stepperBtnText: {
     color: palette.amber,
-    fontSize: 16,
+    fontSize: padSize(16),
     fontWeight: '700',
   },
   stepperValue: {
     color: palette.ink,
-    fontSize: 17,
+    fontSize: padSize(17),
     fontWeight: '600',
-    minWidth: 70,
+    minWidth: padSize(70),
     textAlign: 'center',
     fontVariant: ['tabular-nums'],
   },
@@ -490,55 +604,59 @@ const styles = StyleSheet.create({
   },
   presetText: {
     color: palette.inkDim,
-    fontSize: 14,
+    fontSize: padSize(14),
     fontWeight: '600',
   },
   presetTextSelected: {
     color: palette.buttonInk,
   },
-  footer: {
+  footerBar: {
+    alignItems: 'center',
     paddingHorizontal: 24,
-    paddingBottom: 16,
+    paddingBottom: FOOTER_PAD_BOTTOM,
+  },
+  footerInner: {
+    width: '100%',
   },
   primaryBtn: {
     backgroundColor: palette.amber,
     borderRadius: 999,
-    paddingVertical: 18,
+    paddingVertical: BTN_PAD_V,
     alignItems: 'center',
     borderWidth: 1.5,
     borderColor: 'transparent',
   },
   primaryBtnText: {
     color: palette.buttonInk,
-    fontSize: 17,
+    fontSize: BTN_FONT,
     fontWeight: '700',
   },
   giveUpBtn: {
     borderRadius: 999,
-    paddingVertical: 18,
+    paddingVertical: BTN_PAD_V,
     alignItems: 'center',
     borderWidth: 1.5,
     borderColor: 'rgba(255,107,107,0.35)',
   },
   giveUpBtnText: {
     color: palette.danger,
-    fontSize: 17,
+    fontSize: BTN_FONT,
     fontWeight: '600',
   },
   swatchRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
-    height: 30,
+    height: SWATCH_ROW_H,
   },
   swatchWrap: {
-    width: 26,
-    height: 26,
+    width: SWATCH,
+    height: SWATCH,
   },
   swatch: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
+    width: SWATCH,
+    height: SWATCH,
+    borderRadius: SWATCH / 2,
   },
   swatchSelected: {
     borderWidth: 3,
@@ -561,13 +679,13 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   },
   hintSlot: {
-    height: 40,
+    height: HINT_H,
     justifyContent: 'center',
   },
   footerHint: {
     color: palette.inkDim,
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: padSize(12),
+    lineHeight: padSize(16),
     textAlign: 'center',
   },
 });
