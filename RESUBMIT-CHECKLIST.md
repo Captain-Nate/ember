@@ -110,10 +110,9 @@ opaque (benign — build 1 cleared upload).
       `~/Desktop/ember-screenshots/ipad13/` (`01-focus`, `02-candles`,
       `03-shop`, `04-session`, `05-complete`). The **iPhone** set in
       `~/Desktop/ember-screenshots/` is still valid.
-- [ ] **Listen to the completion chime on a real device** — simulator audio was
-      not verifiable. This is exactly where the stale-snapshot bug bit before;
-      sanity check `ls -la ios/Ember/ember-complete.wav
-      assets/sounds/ember-complete.wav` — sizes must match.
+- [x] **Completion chime verified on device** (Nate, 2026-08-04) — 1.0.0(2)
+      Release build on the iPhone 15 Pro; foreground chime sounds right. File
+      sizes match between `assets/sounds/` and `ios/Ember/` (247,004 bytes).
 - [ ] **Paste the updated reviewer notes** from APP-STORE-SUBMISSION.md §6.
 - [ ] **Update the description** with the Dynamic Island / "device" wording.
 - [ ] Archive and upload (see §0 — back up `ios/ExportOptions.plist` before any
