@@ -1,5 +1,8 @@
 # Ember 1.0.0 build 2 — pre-resubmit review
 
+> **RESUBMITTED 2026-08-04.** Every step below is done; this file is now the
+> record of what build 2 changed and why. On approval: press Release (manual).
+
 Everything done on **2026-08-04** after Apple rejected build 1, in one place.
 Read this first when you come back to it; the deep detail lives in
 [APP-STORE-SUBMISSION.md](APP-STORE-SUBMISSION.md) §0a/§0b.
@@ -104,20 +107,20 @@ opaque (benign — build 1 cleared upload).
 
 ## 4. Do these before resubmitting
 
-- [ ] **Re-attach all 7 IAPs to build 2** in App Store Connect. First-time IAPs
+- [x] **Re-attach all 7 IAPs to build 2** in App Store Connect. First-time IAPs
       are only reviewed if attached to the submitted version.
-- [ ] **Upload the iPad screenshots** — now mandatory. Five at **2064×2752** in
+- [x] **Upload the iPad screenshots** — now mandatory. Five at **2064×2752** in
       `~/Desktop/ember-screenshots/ipad13/` (`01-focus`, `02-candles`,
       `03-shop`, `04-session`, `05-complete`). The **iPhone** set in
       `~/Desktop/ember-screenshots/` is still valid.
 - [x] **Completion chime verified on device** (Nate, 2026-08-04) — 1.0.0(2)
       Release build on the iPhone 15 Pro; foreground chime sounds right. File
       sizes match between `assets/sounds/` and `ios/Ember/` (247,004 bytes).
-- [ ] **Paste the updated reviewer notes** from APP-STORE-SUBMISSION.md §6.
-- [ ] **Update the description** with the Dynamic Island / "device" wording.
-- [ ] Archive and upload (see §0 — back up `ios/ExportOptions.plist` before any
+- [x] **Paste the updated reviewer notes** from APP-STORE-SUBMISSION.md §6.
+- [x] **Update the description** with the Dynamic Island / "device" wording.
+- [x] Archive and upload (see §0 — back up `ios/ExportOptions.plist` before any
       prebuild; it's gitignored and prebuild deletes it).
-- [ ] **Reply in Resolution Center** stating both fixes.
+- [x] **Reply in Resolution Center** stating both fixes.
 
 ---
 
