@@ -5,7 +5,7 @@ Companion doc: [IAP-SETUP.md](IAP-SETUP.md) style — this one is the paperwork.
 
 ---
 
-## 1.0.1 — Garnet theme + review prompt (code built 2026-08-11)
+## 1.0.1 — Ruby theme + review prompt (code built 2026-08-11)
 
 First release under the **Ciel Labs LLC org account** (app transferred
 2026-08-11). Code is done and web-verified; what remains is signing + ASC:
@@ -18,8 +18,8 @@ First release under the **Ciel Labs LLC org account** (app transferred
       `teamID`** to the org team.
 - [ ] First archive re-mints org signing: `xcodebuild archive
       -allowProvisioningUpdates DEVELOPMENT_TEAM=<ORG_TEAM>` (§5 flow).
-- [ ] **ASC (org account): create IAP** `com.captainnate.ember.theme.garnet`,
-      non-consumable, $0.99, name "Garnet theme". Reuse the legacy-size
+- [ ] **ASC (org account): create IAP** `com.captainnate.ember.theme.ruby`,
+      non-consumable, $0.99, name "Ruby theme". Reuse the legacy-size
       `iap-review.png` trick for its review screenshot (§4). **Attach it — and
       only it — to the 1.0.1 submission** (the other 7 are already approved).
 - [ ] Bundle needs no ASC change — `.themes.all` already sells "every future
@@ -27,9 +27,9 @@ First release under the **Ciel Labs LLC org account** (app transferred
       (`ownsBundle` flag + legacy migration in `src/lib/entitlements.ts`).
 - [ ] Listing screenshots stay valid (shop screenshot shows 7 products, now 8
       in-app — acceptable drift, reshoot only if convenient).
-- [ ] What's New: new Garnet theme; polish.
+- [ ] What's New: new Ruby theme; polish.
 
-Code in this update: `garnet` in `themes.ts` **and** `Themes.swift` (keep in
+Code in this update: `ruby` in `themes.ts` **and** `Themes.swift` (keep in
 sync) + `store/Ember.storekit`; bundle forward-entitlement (above); milestone
 review ask via `expo-store-review` (`src/lib/review-ask.ts`, fires after the
 3rd/15th/40th completed session, 2.8s after the done screen). Version 1.0.1

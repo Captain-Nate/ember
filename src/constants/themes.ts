@@ -8,7 +8,7 @@ export type ThemeId =
   | 'rose'
   | 'sapphire'
   | 'moonlight'
-  | 'garnet';
+  | 'ruby';
 
 export interface Theme {
   id: ThemeId;
@@ -130,21 +130,21 @@ export const THEMES: Record<ThemeId, Theme> = {
       glow: '#C7CEDC',
     },
   },
-  garnet: {
-    id: 'garnet',
-    name: 'Garnet',
-    accent: '#F4667C',
-    accentDeep: '#A8102F',
-    buttonInk: '#38060F',
+  ruby: {
+    id: 'ruby',
+    name: 'Ruby',
+    accent: '#F4525A',
+    accentDeep: '#B00E1C',
+    buttonInk: '#3D050B',
     flame: {
-      bodyTop: '#FF97A0',
-      bodyMid: '#EE4160',
-      bodyBottom: '#A8102F',
-      innerTop: '#FFE1E3',
-      innerBottom: '#FF9BA4',
-      face: '#43081A',
-      cheek: '#E23558',
-      glow: '#EE4160',
+      bodyTop: '#FF867E',
+      bodyMid: '#E8232E',
+      bodyBottom: '#9E0B18',
+      innerTop: '#FFE5E0',
+      innerBottom: '#FF9C92',
+      face: '#4A0A10',
+      cheek: '#E0313C',
+      glow: '#E8232E',
     },
   },
 };

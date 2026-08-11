@@ -50,10 +50,10 @@ struct EmberTheme {
       innerTop: Color(hex: 0xFFFFFF), innerBottom: Color(hex: 0xDFE5EF),
       face: Color(hex: 0x2A3040), accent: Color(hex: 0xD5DCE8)
     ),
-    "garnet": EmberTheme(
-      bodyTop: Color(hex: 0xFF97A0), bodyMid: Color(hex: 0xEE4160), bodyBottom: Color(hex: 0xA8102F),
-      innerTop: Color(hex: 0xFFE1E3), innerBottom: Color(hex: 0xFF9BA4),
-      face: Color(hex: 0x43081A), accent: Color(hex: 0xF4667C)
+    "ruby": EmberTheme(
+      bodyTop: Color(hex: 0xFF867E), bodyMid: Color(hex: 0xE8232E), bodyBottom: Color(hex: 0x9E0B18),
+      innerTop: Color(hex: 0xFFE5E0), innerBottom: Color(hex: 0xFF9C92),
+      face: Color(hex: 0x4A0A10), accent: Color(hex: 0xF4525A)
     ),
   ]
 

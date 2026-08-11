@@ -98,13 +98,13 @@
       "internalID": "6739990008",
       "localizations": [
         {
-          "description": "Deep crimson flame and candle color",
-          "displayName": "Garnet theme",
+          "description": "Red flame and candle color",
+          "displayName": "Ruby theme",
           "locale": "en_US"
         }
       ],
-      "productID": "com.captainnate.ember.theme.garnet",
-      "referenceName": "Garnet theme",
+      "productID": "com.captainnate.ember.theme.ruby",
+      "referenceName": "Ruby theme",
       "type": "NonConsumable"
     },
     {
