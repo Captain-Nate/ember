@@ -1,128 +1,137 @@
 {
-  "identifier" : "05C33EB8-42EB-4046-A0C3-CB9AD1E89D62",
-  "nonRenewingSubscriptions" : [
-
-  ],
-  "products" : [
+  "identifier": "05C33EB8-42EB-4046-A0C3-CB9AD1E89D62",
+  "nonRenewingSubscriptions": [],
+  "products": [
     {
-      "displayPrice" : "0.99",
-      "familyShareable" : false,
-      "internalID" : "6739990001",
-      "localizations" : [
+      "displayPrice": "0.99",
+      "familyShareable": false,
+      "internalID": "6739990001",
+      "localizations": [
         {
-          "description" : "Green flame and candle color",
-          "displayName" : "Verdant theme",
-          "locale" : "en_US"
+          "description": "Green flame and candle color",
+          "displayName": "Verdant theme",
+          "locale": "en_US"
         }
       ],
-      "productID" : "com.captainnate.ember.theme.verdant",
-      "referenceName" : "Verdant theme",
-      "type" : "NonConsumable"
+      "productID": "com.captainnate.ember.theme.verdant",
+      "referenceName": "Verdant theme",
+      "type": "NonConsumable"
     },
     {
-      "displayPrice" : "0.99",
-      "familyShareable" : false,
-      "internalID" : "6739990002",
-      "localizations" : [
+      "displayPrice": "0.99",
+      "familyShareable": false,
+      "internalID": "6739990002",
+      "localizations": [
         {
-          "description" : "Cyan flame and candle color",
-          "displayName" : "Glacier theme",
-          "locale" : "en_US"
+          "description": "Cyan flame and candle color",
+          "displayName": "Glacier theme",
+          "locale": "en_US"
         }
       ],
-      "productID" : "com.captainnate.ember.theme.glacier",
-      "referenceName" : "Glacier theme",
-      "type" : "NonConsumable"
+      "productID": "com.captainnate.ember.theme.glacier",
+      "referenceName": "Glacier theme",
+      "type": "NonConsumable"
     },
     {
-      "displayPrice" : "0.99",
-      "familyShareable" : false,
-      "internalID" : "6739990003",
-      "localizations" : [
+      "displayPrice": "0.99",
+      "familyShareable": false,
+      "internalID": "6739990003",
+      "localizations": [
         {
-          "description" : "Purple flame and candle color",
-          "displayName" : "Amethyst theme",
-          "locale" : "en_US"
+          "description": "Purple flame and candle color",
+          "displayName": "Amethyst theme",
+          "locale": "en_US"
         }
       ],
-      "productID" : "com.captainnate.ember.theme.amethyst",
-      "referenceName" : "Amethyst theme",
-      "type" : "NonConsumable"
+      "productID": "com.captainnate.ember.theme.amethyst",
+      "referenceName": "Amethyst theme",
+      "type": "NonConsumable"
     },
     {
-      "displayPrice" : "0.99",
-      "familyShareable" : false,
-      "internalID" : "6739990004",
-      "localizations" : [
+      "displayPrice": "0.99",
+      "familyShareable": false,
+      "internalID": "6739990004",
+      "localizations": [
         {
-          "description" : "Pink flame and candle color",
-          "displayName" : "Rose theme",
-          "locale" : "en_US"
+          "description": "Pink flame and candle color",
+          "displayName": "Rose theme",
+          "locale": "en_US"
         }
       ],
-      "productID" : "com.captainnate.ember.theme.rose",
-      "referenceName" : "Rose theme",
-      "type" : "NonConsumable"
+      "productID": "com.captainnate.ember.theme.rose",
+      "referenceName": "Rose theme",
+      "type": "NonConsumable"
     },
     {
-      "displayPrice" : "0.99",
-      "familyShareable" : false,
-      "internalID" : "6739990005",
-      "localizations" : [
+      "displayPrice": "0.99",
+      "familyShareable": false,
+      "internalID": "6739990005",
+      "localizations": [
         {
-          "description" : "Royal blue flame and candle color",
-          "displayName" : "Sapphire theme",
-          "locale" : "en_US"
+          "description": "Royal blue flame and candle color",
+          "displayName": "Sapphire theme",
+          "locale": "en_US"
         }
       ],
-      "productID" : "com.captainnate.ember.theme.sapphire",
-      "referenceName" : "Sapphire theme",
-      "type" : "NonConsumable"
+      "productID": "com.captainnate.ember.theme.sapphire",
+      "referenceName": "Sapphire theme",
+      "type": "NonConsumable"
     },
     {
-      "displayPrice" : "0.99",
-      "familyShareable" : false,
-      "internalID" : "6739990006",
-      "localizations" : [
+      "displayPrice": "0.99",
+      "familyShareable": false,
+      "internalID": "6739990006",
+      "localizations": [
         {
-          "description" : "Silver flame and candle color",
-          "displayName" : "Moonlight theme",
-          "locale" : "en_US"
+          "description": "Silver flame and candle color",
+          "displayName": "Moonlight theme",
+          "locale": "en_US"
         }
       ],
-      "productID" : "com.captainnate.ember.theme.moonlight",
-      "referenceName" : "Moonlight theme",
-      "type" : "NonConsumable"
+      "productID": "com.captainnate.ember.theme.moonlight",
+      "referenceName": "Moonlight theme",
+      "type": "NonConsumable"
     },
     {
-      "displayPrice" : "2.99",
-      "familyShareable" : false,
-      "internalID" : "6739990007",
-      "localizations" : [
+      "displayPrice": "0.99",
+      "familyShareable": false,
+      "internalID": "6739990008",
+      "localizations": [
         {
-          "description" : "Every theme, including all future themes",
-          "displayName" : "All themes",
-          "locale" : "en_US"
+          "description": "Deep crimson flame and candle color",
+          "displayName": "Garnet theme",
+          "locale": "en_US"
         }
       ],
-      "productID" : "com.captainnate.ember.themes.all",
-      "referenceName" : "All themes bundle",
-      "type" : "NonConsumable"
+      "productID": "com.captainnate.ember.theme.garnet",
+      "referenceName": "Garnet theme",
+      "type": "NonConsumable"
+    },
+    {
+      "displayPrice": "2.99",
+      "familyShareable": false,
+      "internalID": "6739990007",
+      "localizations": [
+        {
+          "description": "Every theme, including all future themes",
+          "displayName": "All themes",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.captainnate.ember.themes.all",
+      "referenceName": "All themes bundle",
+      "type": "NonConsumable"
     }
   ],
-  "settings" : {
-    "_failTransactionsEnabled" : false,
-    "_locale" : "en_US",
-    "_storefront" : "USA",
-    "_storeKitErrors" : [
-
-    ]
+  "settings": {
+    "_failTransactionsEnabled": false,
+    "_locale": "en_US",
+    "_storefront": "USA",
+    "_storeKitErrors": []
   },
-  "subscriptionGroups" : [
-
-  ],
-  "version" : {
-    "major" : 3,
-    "minor" : 0
+  "subscriptionGroups": [],
+  "version": {
+    "major": 3,
+    "minor": 0
   }
 }

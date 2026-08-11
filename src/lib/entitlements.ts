@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert, Platform } from 'react-native';
 
-import { THEMES, ThemeId } from '@/constants/themes';
+import { THEME_IDS, THEMES, ThemeId } from '@/constants/themes';
 
 const KEY = 'ember.entitlements.v1';
 
@@ -38,40 +38,66 @@ export const DEV_UNLOCK_ALL = false;
 
 interface Entitlements {
   ownedThemes: ThemeId[];
+  /** Set on bundle purchase — the bundle's public promise covers every future theme. */
+  ownsBundle?: boolean;
 }
 
-export async function loadOwnedThemes(): Promise<ThemeId[]> {
-  if (DEV_UNLOCK_ALL) return Object.keys(THEMES) as ThemeId[];
+/** The paid themes that existed before `ownsBundle` was stored (1.0.0). A
+ *  record covering all of them predates the flag and can only have come from
+ *  the bundle (or an equivalent spend), so it inherits the bundle's
+ *  future-themes promise. Fixed list — must NOT grow as themes are added. */
+const PRE_FLAG_BUNDLE_SET: ThemeId[] = [
+  'verdant',
+  'glacier',
+  'amethyst',
+  'rose',
+  'sapphire',
+  'moonlight',
+];
+
+async function loadStored(): Promise<Entitlements> {
   try {
     const raw = await AsyncStorage.getItem(KEY);
     const parsed = raw ? (JSON.parse(raw) as Entitlements) : null;
-    const owned = new Set<ThemeId>(parsed?.ownedThemes ?? []);
-    owned.add(FREE_THEME);
-    return [...owned].filter((id) => id in THEMES);
+    return { ownedThemes: parsed?.ownedThemes ?? [], ownsBundle: parsed?.ownsBundle ?? false };
   } catch {
-    return [FREE_THEME];
+    return { ownedThemes: [], ownsBundle: false };
   }
 }
 
-function save(owned: ThemeId[]): void {
-  AsyncStorage.setItem(KEY, JSON.stringify({ ownedThemes: owned } satisfies Entitlements)).catch(
-    () => {},
-  );
+export async function loadOwnedThemes(): Promise<ThemeId[]> {
+  if (DEV_UNLOCK_ALL) return [...THEME_IDS];
+  const stored = await loadStored();
+  const owned = new Set<ThemeId>(stored.ownedThemes);
+  owned.add(FREE_THEME);
+  const ownsBundle = stored.ownsBundle || PRE_FLAG_BUNDLE_SET.every((id) => owned.has(id));
+  if (ownsBundle) {
+    // Upgrade pre-flag records, and sweep in any theme added since last save.
+    if (!stored.ownsBundle || THEME_IDS.some((id) => !owned.has(id)))
+      save({ ownedThemes: [...THEME_IDS], ownsBundle: true });
+    return [...THEME_IDS];
+  }
+  return [...owned].filter((id) => id in THEMES);
+}
+
+function save(ent: Entitlements): void {
+  AsyncStorage.setItem(KEY, JSON.stringify(ent)).catch(() => {});
 }
 
 /** Stubbed purchase: unlocks locally. Swapped for StoreKit in Phase 2. */
 export async function unlockTheme(id: ThemeId): Promise<ThemeId[]> {
-  const owned = await loadOwnedThemes();
-  if (!owned.includes(id)) owned.push(id);
-  save(owned);
-  return owned;
+  const stored = await loadStored();
+  if (!stored.ownedThemes.includes(id)) stored.ownedThemes.push(id);
+  save(stored);
+  if (stored.ownsBundle) return [...THEME_IDS];
+  const owned = new Set<ThemeId>([FREE_THEME, ...stored.ownedThemes]);
+  return [...owned].filter((themeId) => themeId in THEMES);
 }
 
-/** Stubbed bundle purchase: unlocks everything, including future themes by design. */
+/** Bundle purchase: unlocks everything, including future themes by design. */
 export async function unlockAllThemes(): Promise<ThemeId[]> {
-  const all = Object.keys(THEMES) as ThemeId[];
-  save(all);
-  return all;
+  save({ ownedThemes: [...THEME_IDS], ownsBundle: true });
+  return [...THEME_IDS];
 }
 
 /** Pre-shop installs may have a now-locked theme selected — let them keep it. */

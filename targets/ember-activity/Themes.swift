@@ -50,6 +50,11 @@ struct EmberTheme {
       innerTop: Color(hex: 0xFFFFFF), innerBottom: Color(hex: 0xDFE5EF),
       face: Color(hex: 0x2A3040), accent: Color(hex: 0xD5DCE8)
     ),
+    "garnet": EmberTheme(
+      bodyTop: Color(hex: 0xFF97A0), bodyMid: Color(hex: 0xEE4160), bodyBottom: Color(hex: 0xA8102F),
+      innerTop: Color(hex: 0xFFE1E3), innerBottom: Color(hex: 0xFF9BA4),
+      face: Color(hex: 0x43081A), accent: Color(hex: 0xF4667C)
+    ),
   ]
 
   static func named(_ id: String) -> EmberTheme {

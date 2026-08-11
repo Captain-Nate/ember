@@ -3,6 +3,43 @@
 Working checklist for the v1.0 submission. Tick items as they land.
 Companion doc: [IAP-SETUP.md](IAP-SETUP.md) style — this one is the paperwork.
 
+---
+
+## 1.0.1 — Garnet theme + review prompt (code built 2026-08-11)
+
+First release under the **Ciel Labs LLC org account** (app transferred
+2026-08-11). Code is done and web-verified; what remains is signing + ASC:
+
+- [ ] **Org Team ID** into `app.json` → `ios.appleTeamId` (currently still the
+      Individual `7Y5KKUDQ6F`). Find it in the org ASC → Membership, with Xcode
+      signed in as `hello@ciellabs.app`.
+- [ ] Back up `ios/ExportOptions.plist`, then `npx expo prebuild -p ios` (new
+      team + expo-store-review pod). Restore the plist and **update its
+      `teamID`** to the org team.
+- [ ] First archive re-mints org signing: `xcodebuild archive
+      -allowProvisioningUpdates DEVELOPMENT_TEAM=<ORG_TEAM>` (§5 flow).
+- [ ] **ASC (org account): create IAP** `com.captainnate.ember.theme.garnet`,
+      non-consumable, $0.99, name "Garnet theme". Reuse the legacy-size
+      `iap-review.png` trick for its review screenshot (§4). **Attach it — and
+      only it — to the 1.0.1 submission** (the other 7 are already approved).
+- [ ] Bundle needs no ASC change — `.themes.all` already sells "every future
+      theme"; the app now grants new themes to bundle owners automatically
+      (`ownsBundle` flag + legacy migration in `src/lib/entitlements.ts`).
+- [ ] Listing screenshots stay valid (shop screenshot shows 7 products, now 8
+      in-app — acceptable drift, reshoot only if convenient).
+- [ ] What's New: new Garnet theme; polish.
+
+Code in this update: `garnet` in `themes.ts` **and** `Themes.swift` (keep in
+sync) + `store/Ember.storekit`; bundle forward-entitlement (above); milestone
+review ask via `expo-store-review` (`src/lib/review-ask.ts`, fires after the
+3rd/15th/40th completed session, 2.8s after the done screen). Version 1.0.1
+(build 3).
+
+> ⚠️ Swatch-row headroom: 8 swatches fit every verified window (row ≈402pt on
+> iPad vs the preset row's 440pt). At **9 themes** the swatch row becomes the
+> widest control (~454pt) and at **10** it breaks the ~488pt minimum window —
+> the row needs wrapping/redesign before a 10th theme ships.
+
 **State at the time of writing (2026-07-22):** repo clean at `7c4182c`,
 `version` 1.0.0, `DEV_UNLOCK_ALL = false`, dev reset button is `__DEV__`-gated
 (cannot ship), `ios.supportsTablet` unset so the app is **iPhone-only** — no

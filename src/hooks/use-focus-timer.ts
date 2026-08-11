@@ -11,6 +11,7 @@ import {
   initSessionAlerts,
   scheduleSessionComplete,
 } from '@/lib/session-alerts';
+import { maybeAskForReview } from '@/lib/review-ask';
 import { appendSession } from '@/lib/session-log';
 
 export type TimerStatus = 'idle' | 'running' | 'done' | 'doused';
@@ -134,6 +135,7 @@ export function useFocusTimer(themeId: ThemeId) {
       AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next)).catch(() => {});
       return next;
     });
+    maybeAskForReview();
   }, []);
 
   const start = useCallback(

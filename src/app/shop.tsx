@@ -71,11 +71,9 @@ export default function ShopScreen() {
           onPress={ownsAll ? undefined : shop.buyBundle}
         >
           <View style={styles.bundleDots}>
-            {(['verdant', 'glacier', 'amethyst', 'rose', 'sapphire', 'moonlight'] as ThemeId[]).map(
-              (id) => (
-                <View key={id} style={[styles.bundleDot, { backgroundColor: THEMES[id].accent }]} />
-              ),
-            )}
+            {THEME_IDS.filter((id) => id !== FREE_THEME).map((id) => (
+              <View key={id} style={[styles.bundleDot, { backgroundColor: THEMES[id].accent }]} />
+            ))}
           </View>
           <View style={styles.rowBody}>
             <Text style={styles.rowName}>All themes</Text>

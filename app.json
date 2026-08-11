@@ -2,7 +2,7 @@
   "expo": {
     "name": "Ember",
     "slug": "ember",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon-ember.png",
     "scheme": "ember",
@@ -11,7 +11,7 @@
     "ios": {
       "icon": "./assets/images/icon-ember.png",
       "bundleIdentifier": "com.captainnate.ember",
-      "buildNumber": "2",
+      "buildNumber": "3",
       "appleTeamId": "7Y5KKUDQ6F",
       "supportsTablet": true,
       "infoPlist": {
