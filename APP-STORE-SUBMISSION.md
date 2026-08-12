@@ -5,10 +5,16 @@ Companion doc: [IAP-SETUP.md](IAP-SETUP.md) style — this one is the paperwork.
 
 ---
 
-## 1.0.1 — Ruby theme + review prompt (code built 2026-08-11)
+## 1.0.1 — Ruby theme + review prompt — ✅ SUBMITTED FOR REVIEW 2026-08-11
 
-First release under the **Ciel Labs LLC org account** (app transferred
-2026-08-11). Code is done and web-verified; what remains is signing + ASC:
+First release under the **Ciel Labs LLC org account** — transferred, rebuilt,
+and submitted the same day. Build 3 + Ruby IAP in review together. Listing
+depersonalized with the submission: support + marketing URLs →
+`https://ciellabs.app` (was `captain-nate.github.io`), copyright
+"2026 Ciel Labs LLC". Ruby sandbox purchase verified pre-submission.
+On approval: release, then update PORTFOLIO.md + ember memory, then the
+1MS org update reuses this section's recipe (mind the two landmines:
+extension App IDs don't transfer; check 1MS's iCloud KV-store prefix).
 
 - [x] **Org Team ID = `VK3852RCTS`** into `app.json` → `ios.appleTeamId`
       (was the Individual `7Y5KKUDQ6F`). Xcode must be signed in as
