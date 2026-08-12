@@ -10,14 +10,23 @@ Companion doc: [IAP-SETUP.md](IAP-SETUP.md) style — this one is the paperwork.
 First release under the **Ciel Labs LLC org account** (app transferred
 2026-08-11). Code is done and web-verified; what remains is signing + ASC:
 
-- [ ] **Org Team ID** into `app.json` → `ios.appleTeamId` (currently still the
-      Individual `7Y5KKUDQ6F`). Find it in the org ASC → Membership, with Xcode
-      signed in as `hello@ciellabs.app`.
-- [ ] Back up `ios/ExportOptions.plist`, then `npx expo prebuild -p ios` (new
+- [x] **Org Team ID = `VK3852RCTS`** into `app.json` → `ios.appleTeamId`
+      (was the Individual `7Y5KKUDQ6F`). Xcode must be signed in as
+      `hello@ciellabs.app` for `-allowProvisioningUpdates` to mint org signing.
+- [x] Back up `ios/ExportOptions.plist`, then `npx expo prebuild -p ios` (new
       team + expo-store-review pod). Restore the plist and **update its
-      `teamID`** to the org team.
-- [ ] First archive re-mints org signing: `xcodebuild archive
-      -allowProvisioningUpdates DEVELOPMENT_TEAM=<ORG_TEAM>` (§5 flow).
+      `teamID`** to the org team. ✅ 2026-08-11.
+- [x] Archive + upload under the org team ✅ **BUILD 3 UPLOADED 2026-08-11**
+      (`xcodebuild archive -allowProvisioningUpdates
+      DEVELOPMENT_TEAM=VK3852RCTS` → `-exportArchive`; artifact verified:
+      no `UIBackgroundModes`, family `[1,2]`, 1.0.1(3) app+widget, chime
+      byte-exact, TeamIdentifier=VK3852RCTS).
+      **⚠️ Transfer landmine (applies to every future transfer):** app
+      transfers move the MAIN App ID only — the widget's
+      `com.captainnate.ember.widget` stayed registered to the old Individual
+      team and blocked the archive ("cannot be registered … not available").
+      Fix: old account → developer.apple.com → Identifiers → delete the
+      orphaned extension App ID → rerun; the org re-registers it.
 - [ ] **ASC (org account): create IAP** `com.captainnate.ember.theme.ruby`,
       non-consumable, $0.99, name "Ruby theme". Reuse the legacy-size
       `iap-review.png` trick for its review screenshot (§4). **Attach it — and
